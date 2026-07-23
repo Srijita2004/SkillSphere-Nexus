@@ -1,0 +1,473 @@
+<section class="learning-page">
+
+  <header class="learning-header">
+
+    <div>
+      <a
+        *ngIf="course"
+        [routerLink]="[
+          '/courses',
+          course.courseId
+        ]"
+        class="back-link"
+      >
+        ← Back to Course Details
+      </a>
+
+      <p class="eyebrow">
+        SkillSphere Learning Room
+      </p>
+
+      <h1>
+        {{
+          course?.title ||
+          'Course Learning'
+        }}
+      </h1>
+
+      <p class="header-description">
+        Complete the learning contents,
+        track your progress and finish all
+        mandatory course requirements.
+      </p>
+    </div>
+
+    <div
+      *ngIf="enrollment"
+      class="enrollment-status"
+    >
+      <span>Enrollment</span>
+
+      <strong>
+        {{ enrollment.status }}
+      </strong>
+    </div>
+
+  </header>
+
+  <div
+    *ngIf="isLoading"
+    class="state-panel"
+  >
+    <div class="loader"></div>
+
+    <p>
+      Loading course learning contents...
+    </p>
+  </div>
+
+  <div
+    *ngIf="!isLoading && errorMessage"
+    class="state-panel error-panel"
+  >
+    <h2>Unable to open learning room</h2>
+
+    <p>{{ errorMessage }}</p>
+
+    <a
+      routerLink="/courses"
+      class="primary-link"
+    >
+      Return to Courses
+    </a>
+  </div>
+
+  <ng-container
+    *ngIf="
+      !isLoading &&
+      !errorMessage
+    "
+  >
+    <section
+      *ngIf="progressSummary"
+      class="progress-summary"
+    >
+      <div class="summary-main">
+
+        <div class="summary-percentage">
+          {{
+            progressSummary
+              .overallProgressPercentage
+              | number: '1.0-0'
+          }}%
+        </div>
+
+        <div>
+          <p class="summary-label">
+            Overall Course Progress
+          </p>
+
+          <h2>
+            {{
+              progressSummary
+                .completedContents
+            }}
+            of
+            {{
+              progressSummary
+                .totalPublishedContents
+            }}
+            contents completed
+          </h2>
+        </div>
+
+      </div>
+
+      <div class="summary-progress-bar">
+        <div
+          class="summary-progress-fill"
+          [style.width.%]="
+            progressSummary
+              .overallProgressPercentage
+          "
+        ></div>
+      </div>
+
+      <div class="summary-stat-grid">
+
+        <div class="summary-stat">
+          <span>In Progress</span>
+
+          <strong>
+            {{
+              progressSummary
+                .inProgressContents
+            }}
+          </strong>
+        </div>
+
+        <div class="summary-stat">
+          <span>Not Started</span>
+
+          <strong>
+            {{
+              progressSummary
+                .notStartedContents
+            }}
+          </strong>
+        </div>
+
+        <div class="summary-stat">
+          <span>Mandatory Progress</span>
+
+          <strong>
+            {{
+              progressSummary
+                .mandatoryProgressPercentage
+                | number: '1.0-0'
+            }}%
+          </strong>
+        </div>
+
+        <div class="summary-stat">
+          <span>Learning Time</span>
+
+          <strong>
+            {{
+              formatTime(
+                progressSummary
+                  .totalTimeSpentSeconds
+              )
+            }}
+          </strong>
+        </div>
+
+      </div>
+
+    </section>
+
+    <p
+      *ngIf="actionMessage"
+      class="action-message"
+    >
+      {{ actionMessage }}
+    </p>
+
+    <div
+      *ngIf="moduleGroups.length === 0"
+      class="state-panel"
+    >
+      <h2>No learning modules available</h2>
+
+      <p>
+        Published course modules will appear
+        here.
+      </p>
+    </div>
+
+    <section
+      *ngFor="
+        let group of moduleGroups;
+        let moduleIndex = index;
+        trackBy: trackModuleById
+      "
+      class="module-section"
+    >
+      <header class="module-header">
+
+        <div class="module-number">
+          {{ moduleIndex + 1 }}
+        </div>
+
+        <div class="module-heading">
+          <p>
+            Module
+            {{ group.module.moduleOrder }}
+          </p>
+
+          <h2>
+            {{ group.module.title }}
+          </h2>
+
+          <span>
+            {{
+              group.module.description ||
+              'Complete all available learning contents in this module.'
+            }}
+          </span>
+        </div>
+
+        <div class="module-summary">
+          <strong>
+            {{ group.contents.length }}
+          </strong>
+
+          <span>Contents</span>
+        </div>
+
+      </header>
+
+      <div
+        *ngIf="group.contents.length === 0"
+        class="empty-module"
+      >
+        No published contents are currently
+        available in this module.
+      </div>
+
+      <div class="content-list">
+
+        <article
+          *ngFor="
+            let content of group.contents;
+            trackBy: trackContentById
+          "
+          class="content-card"
+          [class.completed-card]="
+            getProgressPercentage(content)
+              === 100
+          "
+        >
+          <div class="content-icon">
+            {{
+              getContentIcon(
+                content.contentType
+              )
+            }}
+          </div>
+
+          <div class="content-main">
+
+            <div class="content-title-row">
+
+              <div>
+                <div class="content-badges">
+                  <span class="type-badge">
+                    {{ content.contentType }}
+                  </span>
+
+                  <span
+                    *ngIf="content.mandatory"
+                    class="mandatory-badge"
+                  >
+                    Mandatory
+                  </span>
+
+                  <span
+                    *ngIf="
+                      content.previewAvailable
+                    "
+                    class="preview-badge"
+                  >
+                    Preview
+                  </span>
+                </div>
+
+                <h3>{{ content.title }}</h3>
+              </div>
+
+              <span
+                class="progress-status"
+                [class.completed]="
+                  getProgressStatus(content)
+                    === 'COMPLETED'
+                "
+                [class.in-progress]="
+                  getProgressStatus(content)
+                    === 'IN_PROGRESS'
+                "
+              >
+                {{
+                  getProgressStatus(content)
+                }}
+              </span>
+
+            </div>
+
+            <p class="content-description">
+              {{
+                content.description ||
+                'Continue this content to progress through the course.'
+              }}
+            </p>
+
+            <p
+              *ngIf="content.textContent"
+              class="text-preview"
+            >
+              {{ content.textContent }}
+            </p>
+
+            <div class="content-meta">
+              <span>
+                Duration:
+                {{
+                  content.durationMinutes || 0
+                }}
+                min
+              </span>
+
+              <span>
+                Progress:
+                {{
+                  getProgressPercentage(
+                    content
+                  )
+                }}%
+              </span>
+
+              <span>
+                Time spent:
+                {{
+                  formatTime(
+                    content.progress
+                      ?.timeSpentSeconds
+                  )
+                }}
+              </span>
+            </div>
+
+            <div class="content-progress-bar">
+              <div
+                class="content-progress-fill"
+                [style.width.%]="
+                  getProgressPercentage(
+                    content
+                  )
+                "
+              ></div>
+            </div>
+
+          </div>
+
+          <div class="content-actions">
+
+            <button
+              *ngIf="
+                content.contentUrl &&
+                !isAssessmentContent(content)
+              "
+              type="button"
+              class="secondary-button"
+              (click)="openContent(content)"
+            >
+              Open Content
+            </button>
+
+            <ng-container
+              *ngIf="
+                !isAssessmentContent(content)
+              "
+            >
+              <button
+                *ngIf="
+                  getProgressPercentage(
+                    content
+                  ) < 100
+                "
+                type="button"
+                class="continue-button"
+                [disabled]="
+                  updatingContentId !== null
+                "
+                (click)="
+                  continueContent(content)
+                "
+              >
+                {{
+                  getActionLabel(content)
+                }}
+              </button>
+
+              <button
+                *ngIf="
+                  getProgressPercentage(
+                    content
+                  ) < 100
+                "
+                type="button"
+                class="complete-button"
+                [disabled]="
+                  updatingContentId !== null
+                "
+                (click)="
+                  completeContent(content)
+                "
+              >
+                Mark Complete
+              </button>
+            </ng-container>
+
+            <!-- Quiz / Assessment Button -->
+            <a
+              *ngIf="
+                isAssessmentContent(content) &&
+                course
+              "
+              [routerLink]="[
+                '/courses',
+                course.courseId,
+                'assessments',
+                content.contentId
+              ]"
+              class="assessment-button"
+            >
+              ▶
+              {{
+                getAssessmentActionLabel(
+                  content
+                )
+              }}
+            </a>
+
+            <div
+              *ngIf="
+                getProgressPercentage(
+                  content
+                ) === 100
+              "
+              class="completed-label"
+            >
+              ✓ Completed
+            </div>
+
+          </div>
+
+        </article>
+
+      </div>
+
+    </section>
+  </ng-container>
+
+</section>

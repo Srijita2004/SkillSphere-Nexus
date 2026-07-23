@@ -1,0 +1,217 @@
+<div class="page-container">
+
+  <div class="page-header">
+    <div>
+      <h1>Module & Content Management</h1>
+      <p class="page-subtitle">Select a course to manage its modules and learning content.</p>
+    </div>
+  </div>
+
+  <label class="field course-select">
+    <span>Course</span>
+    <select class="field-input" [(ngModel)]="selectedCourseId" name="selectedCourseId" (ngModelChange)="onCourseChange()">
+      <option value="">-- Select a course --</option>
+      @for (course of courses; track course.courseId) {
+        <option [value]="course.courseId">{{ course.courseCode }} — {{ course.title }}</option>
+      }
+    </select>
+  </label>
+
+  @if (selectedCourseId) {
+
+    <div class="columns">
+
+      <!-- Modules column -->
+      <div class="column">
+        <div class="column-header">
+          <h3>Modules</h3>
+          <button class="btn btn-primary btn-sm" (click)="openCreateModuleForm()">+ Add Module</button>
+        </div>
+
+        @if (isLoadingModules) {
+          <div class="state-box">Loading modules…</div>
+        } @else if (modules.length === 0) {
+          <div class="state-box">No modules yet.</div>
+        } @else {
+          <ul class="list">
+            @for (module of modules; track trackById($index, module)) {
+              <li
+                class="list-item"
+                [class.selected]="selectedModuleId === module.moduleId"
+                (click)="selectedModuleId = module.moduleId; onModuleChange()"
+              >
+                <div class="list-item-main">
+                  <span class="list-item-title">{{ module.moduleOrder }}. {{ module.title }}</span>
+                  <span class="badge" [ngClass]="module.published ? 'badge-published' : 'badge-draft'">
+                    {{ module.published ? 'Published' : 'Draft' }}
+                  </span>
+                </div>
+                <div class="list-item-actions">
+                  <button class="btn btn-secondary btn-sm" (click)="openEditModuleForm(module); $event.stopPropagation()">Edit</button>
+                  <button class="btn btn-secondary btn-sm" (click)="togglePublishModule(module); $event.stopPropagation()">
+                    {{ module.published ? 'Unpublish' : 'Publish' }}
+                  </button>
+                  <button class="btn btn-danger btn-sm" (click)="deleteModule(module); $event.stopPropagation()">Delete</button>
+                </div>
+              </li>
+            }
+          </ul>
+        }
+      </div>
+
+      <!-- Content column -->
+      <div class="column">
+        <div class="column-header">
+          <h3>Learning Content</h3>
+          @if (selectedModuleId) {
+            <button class="btn btn-primary btn-sm" (click)="openCreateContentForm()">+ Add Content</button>
+          }
+        </div>
+
+        @if (!selectedModuleId) {
+          <div class="state-box">Select a module to manage its content.</div>
+        } @else if (isLoadingContents) {
+          <div class="state-box">Loading content…</div>
+        } @else if (contents.length === 0) {
+          <div class="state-box">No content yet in this module.</div>
+        } @else {
+          <ul class="list">
+            @for (content of contents; track trackById($index, content)) {
+              <li class="list-item">
+                <div class="list-item-main">
+                  <span class="list-item-title">{{ content.contentOrder }}. {{ content.title }}</span>
+                  <span class="content-type-tag">{{ content.contentType }}</span>
+                  @if (content.mandatory) {
+                    <span class="badge badge-warning">Mandatory</span>
+                  }
+                  <span class="badge" [ngClass]="content.published ? 'badge-published' : 'badge-draft'">
+                    {{ content.published ? 'Published' : 'Draft' }}
+                  </span>
+                </div>
+                <div class="list-item-actions">
+                  <button class="btn btn-secondary btn-sm" (click)="openEditContentForm(content)">Edit</button>
+                  <button class="btn btn-secondary btn-sm" (click)="togglePublishContent(content)">
+                    {{ content.published ? 'Unpublish' : 'Publish' }}
+                  </button>
+                  <button class="btn btn-danger btn-sm" (click)="deleteContent(content)">Delete</button>
+                </div>
+              </li>
+            }
+          </ul>
+        }
+      </div>
+
+    </div>
+  }
+
+  <!-- Module form modal -->
+  @if (isModuleFormOpen) {
+    <div class="modal-overlay open">
+      <div class="modal-box">
+        <h3 class="modal-box-title">{{ isEditingModule ? 'Edit Module' : 'New Module' }}</h3>
+
+        @if (moduleFormErrors.length > 0) {
+          <ul class="form-errors">
+            @for (err of moduleFormErrors; track err) {
+              <li>{{ err }}</li>
+            }
+          </ul>
+        }
+
+        <label class="field">
+          <span>Title</span>
+          <input class="field-input" type="text" [(ngModel)]="moduleForm.title" name="moduleTitle" />
+        </label>
+
+        <label class="field">
+          <span>Description</span>
+          <textarea class="field-input" rows="3" [(ngModel)]="moduleForm.description" name="moduleDescription"></textarea>
+        </label>
+
+        <label class="field">
+          <span>Order</span>
+          <input class="field-input" type="number" min="1" [(ngModel)]="moduleForm.moduleOrder" name="moduleOrder" />
+        </label>
+
+        <div class="modal-actions">
+          <button class="btn btn-secondary" (click)="closeModuleForm()">Cancel</button>
+          <button class="btn btn-primary" (click)="saveModule()">Save Module</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Content form modal -->
+  @if (isContentFormOpen) {
+    <div class="modal-overlay open">
+      <div class="modal-box lg">
+        <h3 class="modal-box-title">{{ isEditingContent ? 'Edit Content' : 'New Content' }}</h3>
+
+        @if (contentFormErrors.length > 0) {
+          <ul class="form-errors">
+            @for (err of contentFormErrors; track err) {
+              <li>{{ err }}</li>
+            }
+          </ul>
+        }
+
+        <div class="form-grid">
+          <label class="field">
+            <span>Title</span>
+            <input class="field-input" type="text" [(ngModel)]="contentForm.title" name="contentTitle" />
+          </label>
+
+          <label class="field">
+            <span>Content Type</span>
+            <select class="field-input" [(ngModel)]="contentForm.contentType" name="contentType">
+              @for (t of contentTypes; track t) {
+                <option [value]="t">{{ t }}</option>
+              }
+            </select>
+          </label>
+
+          <label class="field field-wide">
+            <span>Description</span>
+            <textarea class="field-input" rows="2" [(ngModel)]="contentForm.description" name="contentDescription"></textarea>
+          </label>
+
+          <label class="field">
+            <span>Content URL</span>
+            <input class="field-input" type="text" [(ngModel)]="contentForm.contentUrl" name="contentUrl" />
+          </label>
+
+          <label class="field">
+            <span>Duration (minutes)</span>
+            <input class="field-input" type="number" min="1" [(ngModel)]="contentForm.durationMinutes" name="durationMinutes" />
+          </label>
+
+          <label class="field field-wide">
+            <span>Text Content</span>
+            <textarea class="field-input" rows="3" [(ngModel)]="contentForm.textContent" name="textContent"></textarea>
+          </label>
+
+          <label class="field">
+            <span>Order</span>
+            <input class="field-input" type="number" min="1" [(ngModel)]="contentForm.contentOrder" name="contentOrder" />
+          </label>
+
+          <label class="field checkbox-field">
+            <input type="checkbox" [(ngModel)]="contentForm.mandatory" name="mandatory" />
+            <span>Mandatory</span>
+          </label>
+
+          <label class="field checkbox-field">
+            <input type="checkbox" [(ngModel)]="contentForm.previewAvailable" name="previewAvailable" />
+            <span>Preview available</span>
+          </label>
+        </div>
+
+        <div class="modal-actions">
+          <button class="btn btn-secondary" (click)="closeContentForm()">Cancel</button>
+          <button class="btn btn-primary" (click)="saveContent()">Save Content</button>
+        </div>
+      </div>
+    </div>
+  }
+
+</div>

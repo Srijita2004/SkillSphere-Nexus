@@ -1,0 +1,681 @@
+<div class="dashboard-wrapper">
+
+  <div class="dashboard-header">
+
+    <div>
+      <h1 class="dashboard-title">
+        System & Learning Overview
+      </h1>
+
+      <p class="dashboard-subtitle">
+        Monitor talent management statistics
+        and learner development progress across
+        SkillSphere Nexus.
+      </p>
+    </div>
+
+    <div class="dashboard-header-actions">
+      @if (authService.hasRole('LEARNER')) {
+        <a routerLink="/courses" class="dashboard-action-link">Courses</a>
+        <a routerLink="/learning-paths" class="dashboard-action-link">Learning Paths</a>
+      } @else {
+        <a routerLink="/admin/courses" class="dashboard-action-link">Manage Courses</a>
+        <a routerLink="/hr/payments" class="dashboard-action-link">Verify Payments</a>
+        <a routerLink="/hr/learning-paths" class="dashboard-action-link">Manage Paths</a>
+      }
+      <a routerLink="/course-certificates" class="dashboard-action-link primary-action">Certificates</a>
+    </div>
+
+  </div>
+
+
+  @if (authService.hasRole('ADMIN', 'HR')) {
+  <section class="dashboard-section">
+    <div class="section-heading">
+      <div>
+        <p class="section-eyebrow">Learning Operations</p>
+        <h2>HR Learning Management Overview</h2>
+        <p>Backend-connected enrollment, payment, course, learning path and certificate statistics.</p>
+      </div>
+    </div>
+
+    @if (hrDashboardLoading()) {
+      <div class="loading-overlay"><div class="spinner"></div><h3 class="state-title">Loading Learning Operations</h3></div>
+    } @else if (hrDashboardError()) {
+      <div class="dashboard-error">{{ hrDashboardError() }}</div>
+    } @else if (hrDashboard(); as operations) {
+      <div class="stats-grid hr-operation-grid">
+        <a routerLink="/hr/payments" class="stat-card glass-panel glow-hover operation-card">
+          <div class="stat-content"><span class="stat-label">Pending Payments</span><span class="stat-value">{{ operations.pendingPayments }}</span></div>
+        </a>
+        <a routerLink="/admin/courses" class="stat-card glass-panel glow-hover operation-card">
+          <div class="stat-content"><span class="stat-label">Published Courses</span><span class="stat-value">{{ operations.publishedCourses }} / {{ operations.totalCourses }}</span></div>
+        </a>
+        <div class="stat-card glass-panel glow-hover operation-card">
+          <div class="stat-content"><span class="stat-label">Active Enrollments</span><span class="stat-value">{{ operations.activeEnrollments }}</span></div>
+        </div>
+        <div class="stat-card glass-panel glow-hover operation-card">
+          <div class="stat-content"><span class="stat-label">Completed Enrollments</span><span class="stat-value">{{ operations.completedEnrollments }}</span></div>
+        </div>
+        <a routerLink="/course-certificates" class="stat-card glass-panel glow-hover operation-card">
+          <div class="stat-content"><span class="stat-label">Issued Certificates</span><span class="stat-value">{{ operations.issuedCertificates }}</span></div>
+        </a>
+        <a routerLink="/hr/learning-paths" class="stat-card glass-panel glow-hover operation-card">
+          <div class="stat-content"><span class="stat-label">Published Learning Paths</span><span class="stat-value">{{ operations.publishedLearningPaths }} / {{ operations.totalLearningPaths }}</span></div>
+        </a>
+      </div>
+    }
+  </section>
+  }
+  @if (authService.hasRole('ADMIN', 'HR')) {
+  <!-- M1 Organization Dashboard -->
+  <section class="dashboard-section">
+
+    <div class="section-heading">
+
+      <div>
+        <p class="section-eyebrow">
+          Talent Management
+        </p>
+
+        <h2>Organization Overview</h2>
+
+        <p>
+          Employee, skill, competency and
+          certification information from the
+          talent management modules.
+        </p>
+      </div>
+
+    </div>
+
+    @if (statusLoading()) {
+
+      <div class="loading-overlay">
+        <div class="spinner"></div>
+
+        <h3 class="state-title">
+          Analyzing Organization Metrics
+        </h3>
+
+        <p class="state-desc">
+          Connecting to the talent management
+          services and processing organization
+          statistics...
+        </p>
+      </div>
+
+    } @else if (systemDashboardError()) {
+
+      <div class="dashboard-error">
+        {{ systemDashboardError() }}
+      </div>
+
+    } @else {
+
+      <div class="stats-grid">
+
+        <div class="stat-card glass-panel glow-hover">
+
+          <div class="stat-icon-wrapper blue">
+            <svg
+              width="24"
+              height="24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+              />
+            </svg>
+          </div>
+
+          <div class="stat-content">
+            <span class="stat-label">
+              Total Employees
+            </span>
+
+            <span class="stat-value">
+              {{ employeeCount() }}
+            </span>
+          </div>
+
+        </div>
+
+        <div class="stat-card glass-panel glow-hover">
+
+          <div class="stat-icon-wrapper purple">
+            <svg
+              width="24"
+              height="24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
+              />
+            </svg>
+          </div>
+
+          <div class="stat-content">
+            <span class="stat-label">
+              Skills Catalog
+            </span>
+
+            <span class="stat-value">
+              {{ skillCount() }}
+            </span>
+          </div>
+
+        </div>
+
+        <div class="stat-card glass-panel glow-hover">
+
+          <div class="stat-icon-wrapper green">
+            <svg
+              width="24"
+              height="24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+          </div>
+
+          <div class="stat-content">
+            <span class="stat-label">
+              Average Score
+            </span>
+
+            <span class="stat-value">
+              {{ avgAssessmentScore() }}%
+            </span>
+          </div>
+
+        </div>
+
+        <div class="stat-card glass-panel glow-hover">
+
+          <div class="stat-icon-wrapper cyan">
+            <svg
+              width="24"
+              height="24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"
+              />
+            </svg>
+          </div>
+
+          <div class="stat-content">
+            <span class="stat-label">
+              Valid Certificates
+            </span>
+
+            <span class="stat-value">
+              {{ activeCertCount() }}
+            </span>
+          </div>
+
+        </div>
+
+      </div>
+
+      <div class="dashboard-grid">
+
+        <div class="chart-card glass-panel">
+
+          <h3 class="card-title">
+            Skill Proficiency Distribution
+          </h3>
+
+          <p class="card-subtitle">
+            Aggregate employee skill counts
+            classified by proficiency levels.
+          </p>
+
+          <div class="bar-chart-container">
+
+            @for (
+              item of skillProficiencies()
+                | keyvalue;
+              track item.key
+            ) {
+              <div class="bar-chart-row">
+
+                <span class="bar-label">
+                  L{{ item.key }} Proficiency
+                </span>
+
+                <div class="bar-track">
+                  <div
+                    class="bar-fill"
+                    [style.width.%]="
+                      (
+                        item.value /
+                        (employeeCount() || 1)
+                      ) * 100
+                    "
+                  ></div>
+                </div>
+
+                <span class="bar-value">
+                  {{ item.value }} instances
+                </span>
+
+              </div>
+            }
+
+          </div>
+
+        </div>
+
+        <div class="chart-card glass-panel">
+
+          <h3 class="card-title">
+            Skill Categories Coverage
+          </h3>
+
+          <p class="card-subtitle">
+            Distribution of catalog skills
+            across categorized domain areas.
+          </p>
+
+          <div class="category-list">
+
+            @for (
+              item of skillCategories()
+                | keyvalue;
+              track item.key
+            ) {
+              <div class="category-item">
+
+                <div class="category-info">
+                  <span class="category-name">
+                    {{ item.key }}
+                  </span>
+
+                  <span class="category-percentage">
+                    {{ item.value }} Skills
+                  </span>
+                </div>
+
+                <div class="category-pill-track">
+                  <div
+                    class="category-pill-fill"
+                    [style.width.%]="
+                      (
+                        item.value /
+                        (skillCount() || 1)
+                      ) * 100
+                    "
+                  ></div>
+                </div>
+
+              </div>
+            }
+
+            @if (
+              (skillCategories() | keyvalue)
+                .length === 0
+            ) {
+              <p class="empty-chart-message">
+                No skill categories defined yet.
+              </p>
+            }
+
+          </div>
+
+        </div>
+
+      </div>
+    }
+
+  </section>
+  }
+
+  @if (authService.hasRole('LEARNER')) {
+
+  <!-- M2 Learner Dashboard -->
+  <section class="dashboard-section learner-section">
+
+    <div class="section-heading">
+
+      <div>
+        <p class="section-eyebrow">
+          Learning Management
+        </p>
+
+        <h2>My Learning Journey</h2>
+
+        <p>
+          Enrollment, course completion,
+          assessment, certificate and learning
+          path progress for the current learner.
+        </p>
+      </div>
+
+      <button
+        type="button"
+        class="refresh-dashboard-button"
+        [disabled]="learningStatusLoading()"
+        (click)="fetchLearnerDashboardData()"
+      >
+        {{
+          learningStatusLoading()
+            ? 'Refreshing...'
+            : 'Refresh Learning Data'
+        }}
+      </button>
+
+    </div>
+
+    @if (learningStatusLoading()) {
+
+      <div class="loading-overlay learning-loader">
+        <div class="spinner"></div>
+
+        <h3 class="state-title">
+          Loading Learning Progress
+        </h3>
+
+        <p class="state-desc">
+          Calculating course, assessment,
+          certificate and learning path
+          statistics...
+        </p>
+      </div>
+
+    } @else if (learningDashboardError()) {
+
+      <div class="dashboard-error">
+        {{ learningDashboardError() }}
+      </div>
+
+    } @else if (
+      learnerDashboard();
+      as learning
+    ) {
+
+      <div class="learning-stats-grid">
+
+        <div class="learning-stat-card glass-panel">
+
+          <div class="learning-stat-icon enrollment-icon">
+            E
+          </div>
+
+          <div>
+            <span>Total Enrollments</span>
+
+            <strong>
+              {{ learning.totalEnrollments }}
+            </strong>
+
+            <small>
+              {{ learning.activeEnrollments }}
+              active,
+              {{ learning.pendingEnrollments }}
+              pending
+            </small>
+          </div>
+
+        </div>
+
+        <div class="learning-stat-card glass-panel">
+
+          <div class="learning-stat-icon course-icon">
+            C
+          </div>
+
+          <div>
+            <span>Completed Courses</span>
+
+            <strong>
+              {{ learning.completedCourses }}
+            </strong>
+
+            <small>
+              Successfully finished courses
+            </small>
+          </div>
+
+        </div>
+
+        <div class="learning-stat-card glass-panel">
+
+          <div class="learning-stat-icon progress-icon">
+            %
+          </div>
+
+          <div>
+            <span>Average Progress</span>
+
+            <strong>
+              {{
+                learning.averageCourseProgress
+                  | number: '1.0-0'
+              }}%
+            </strong>
+
+            <small>
+              Across all course enrollments
+            </small>
+          </div>
+
+        </div>
+
+        <div class="learning-stat-card glass-panel">
+
+          <div class="learning-stat-icon certificate-icon">
+            A
+          </div>
+
+          <div>
+            <span>Certificates Earned</span>
+
+            <strong>
+              {{ learning.certificatesEarned }}
+            </strong>
+
+            <small>
+              Verified course certificates
+            </small>
+          </div>
+
+        </div>
+
+      </div>
+
+      <div class="learning-detail-grid">
+
+        <article class="learning-detail-card glass-panel">
+
+          <div class="detail-card-heading">
+            <div>
+              <p class="detail-eyebrow">
+                Assessment Performance
+              </p>
+
+              <h3>Assessment Summary</h3>
+            </div>
+
+            <div class="score-circle">
+              {{ getAssessmentPassRate() }}%
+            </div>
+          </div>
+
+          <div class="detail-progress-track">
+            <div
+              class="detail-progress-fill"
+              [style.width.%]="
+                getAssessmentPassRate()
+              "
+            ></div>
+          </div>
+
+          <div class="detail-stat-grid">
+
+            <div>
+              <span>Total Attempts</span>
+
+              <strong>
+                {{
+                  learning
+                    .totalAssessmentAttempts
+                }}
+              </strong>
+            </div>
+
+            <div>
+              <span>Passed</span>
+
+              <strong class="success-value">
+                {{
+                  learning
+                    .passedAssessments
+                }}
+              </strong>
+            </div>
+
+            <div>
+              <span>Failed</span>
+
+              <strong class="danger-value">
+                {{
+                  learning
+                    .failedAssessments
+                }}
+              </strong>
+            </div>
+
+          </div>
+
+          <a
+            routerLink="/courses"
+            class="detail-link"
+          >
+            Review Course Assessments
+          </a>
+
+        </article>
+
+        <article class="learning-detail-card glass-panel">
+
+          <div class="detail-card-heading">
+            <div>
+              <p class="detail-eyebrow">
+                Career Development
+              </p>
+
+              <h3>Learning Path Summary</h3>
+            </div>
+
+            <div class="score-circle">
+              {{
+                getLearningPathCompletionRate()
+              }}%
+            </div>
+          </div>
+
+          <div class="detail-progress-track">
+            <div
+              class="detail-progress-fill path-progress-fill"
+              [style.width.%]="
+                getLearningPathCompletionRate()
+              "
+            ></div>
+          </div>
+
+          <div class="detail-stat-grid">
+
+            <div>
+              <span>Assigned</span>
+
+              <strong>
+                {{
+                  learning
+                    .assignedLearningPaths
+                }}
+              </strong>
+            </div>
+
+            <div>
+              <span>In Progress</span>
+
+              <strong>
+                {{
+                  learning
+                    .inProgressLearningPaths
+                }}
+              </strong>
+            </div>
+
+            <div>
+              <span>Completed</span>
+
+              <strong class="success-value">
+                {{
+                  learning
+                    .completedLearningPaths
+                }}
+              </strong>
+            </div>
+
+          </div>
+
+          <a
+            routerLink="/learning-paths"
+            class="detail-link"
+          >
+            Open Learning Paths
+          </a>
+
+        </article>
+
+      </div>
+
+      <div class="dashboard-generated-at">
+
+        <span>Learning dashboard updated:</span>
+
+        <strong>
+          {{
+            learning.generatedAt
+              ? (
+                learning.generatedAt
+                  | date: 'dd MMM yyyy, hh:mm a'
+              )
+              : 'Just now'
+          }}
+        </strong>
+
+      </div>
+
+    }
+
+  </section>
+
+  }
+
+</div>

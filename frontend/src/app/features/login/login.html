@@ -1,0 +1,168 @@
+<div class="login-page">
+  <button
+    type="button"
+    class="login-theme-toggle"
+    (click)="toggleTheme()"
+    [attr.aria-label]="themeService.isDarkTheme() ? 'Switch to light theme' : 'Switch to dark theme'"
+  >
+    @if (themeService.isDarkTheme()) {
+      <span aria-hidden="true">☀</span>
+    } @else {
+      <span aria-hidden="true">☾</span>
+    }
+  </button>
+
+  <section class="brand-visual" aria-label="SkillSphere Nexus platform overview">
+    <div class="visual-overlay"></div>
+    <div class="visual-grid"></div>
+
+    <div class="brand-lockup">
+      <img src="/branding/skillsphere-logo.svg" alt="SkillSphere Nexus logo" />
+      <div>
+        <span class="brand-kicker">Enterprise learning intelligence</span>
+        <strong>SkillSphere Nexus</strong>
+      </div>
+    </div>
+
+    <div class="visual-copy">
+      <span class="visual-pill">One connected learning ecosystem</span>
+      <h1>Build skills.<br />Track growth.<br />Create impact.</h1>
+      <p>
+        A unified workspace for employee skills, structured learning,
+        verified achievements and workforce development.
+      </p>
+
+      <div class="feature-strip">
+        <div>
+          <strong>Skills</strong>
+          <span>Competency intelligence</span>
+        </div>
+        <div>
+          <strong>Learning</strong>
+          <span>Courses and progress</span>
+        </div>
+        <div>
+          <strong>Growth</strong>
+          <span>Paths and certificates</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="orbit orbit-one"></div>
+    <div class="orbit orbit-two"></div>
+  </section>
+
+  <section class="auth-panel">
+    <div class="auth-card">
+      <div class="mobile-brand">
+        <img src="/branding/skillsphere-logo.svg" alt="" />
+        <span>SkillSphere Nexus</span>
+      </div>
+
+      <div class="auth-heading">
+        <span class="secure-label"><span class="status-dot"></span> Secure platform access</span>
+        <h2>Welcome back</h2>
+        <p>Enter your registered details to continue to your workspace.</p>
+      </div>
+
+      <form (ngSubmit)="submit()" novalidate>
+        <div class="field-group">
+          <label for="fullName">Full name / username</label>
+          <div class="input-shell">
+            <span class="field-icon" aria-hidden="true">◎</span>
+            <input
+              id="fullName"
+              type="text"
+              placeholder="e.g. Srijita Dutta"
+              autocomplete="name"
+              [(ngModel)]="fullName"
+              name="fullName"
+              [disabled]="isSigningIn"
+            />
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label for="email">Email address</label>
+          <div class="input-shell">
+            <span class="field-icon" aria-hidden="true">@</span>
+            <input
+              id="email"
+              type="email"
+              placeholder="name@example.com"
+              autocomplete="email"
+              [(ngModel)]="email"
+              name="email"
+              [disabled]="isSigningIn"
+            />
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label for="password">Password</label>
+          <div class="input-shell">
+            <span class="field-icon" aria-hidden="true">◇</span>
+            <input
+              id="password"
+              [type]="showPassword ? 'text' : 'password'"
+              placeholder="Minimum 8 characters"
+              autocomplete="current-password"
+              [(ngModel)]="password"
+              name="password"
+              [disabled]="isSigningIn"
+            />
+            <button
+              type="button"
+              class="password-toggle"
+              (click)="showPassword = !showPassword"
+              [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
+            >
+              {{ showPassword ? 'Hide' : 'Show' }}
+            </button>
+          </div>
+        </div>
+
+        <fieldset class="role-fieldset">
+          <legend>Choose your workspace</legend>
+          <div class="role-options">
+            @for (item of roles; track item.value) {
+              <button
+                type="button"
+                class="role-option"
+                [class.selected]="role === item.value"
+                (click)="role = item.value"
+                [disabled]="isSigningIn"
+              >
+                <span class="role-check">{{ role === item.value ? '✓' : '' }}</span>
+                <span class="role-copy">
+                  <strong>{{ item.label }}</strong>
+                  <small>{{ item.description }}</small>
+                </span>
+                <span class="role-tag">{{ item.shortLabel }}</span>
+              </button>
+            }
+          </div>
+        </fieldset>
+
+        @if (errorMessage) {
+          <div class="login-error" role="alert">
+            <span aria-hidden="true">!</span>
+            <p>{{ errorMessage }}</p>
+          </div>
+        }
+
+        <button class="login-button" type="submit" [disabled]="isSigningIn">
+          <span>{{ isSigningIn ? 'Verifying account...' : 'Continue to SkillSphere' }}</span>
+          <span aria-hidden="true">→</span>
+        </button>
+      </form>
+
+      <p class="account-note">
+        One email address creates one account. On the first successful sign-in,
+        the account is registered securely; future sign-ins require the same password and role.
+      </p>
+    </div>
+
+    <p class="login-footer">© 2026 SkillSphere Nexus · Learning that moves people forward</p>
+  </section>
+</div>
